@@ -1,0 +1,49 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+#!/bin/sh
+
+/*add by bsp for user mode flash protect begin*/
+# Started by AICoder, pid:r7d17f86f435992140960a6c0096f6100935844b 
+if [ x`cat /sys/class/android_usb/android0/usb_op` != x"1" ] && [ x`cat /sys/class/android_usb/android0/usb_op` != x"2" ]; then
+	if [ -f /tmp/fota_install_processing ]; then
+		echo "[Flash Protect]User mode,Fota flag exist,Flash Protect Mode not change!" > /dev/kmsg
+	else
+		cat /proc/driver/codec_id
+		echo "[Flash Protect]User mode,Flash Protect On!" > /dev/kmsg
+	fi
+else
+    cat /proc/driver/sensor_id
+    echo "[Flash Protect]Not User mode,Flash Protect Off!" > /dev/kmsg
+fi
+# Ended by AICoder, pid:r7d17f86f435992140960a6c0096f6100935844b 
+/*add by bsp for user mode flash protect end*/
+
+# Started by AICoder, pid:a9b01u2d2ayb824144d90a00e096ff1faa75ba13
+if [ -f /etc/config/zwrt_bsp_test ]; then
+	echo "[BSP][TEST]/etc/config/zwrt_bsp_test exist,check uci settings!" > /dev/kmsg
+	test_mode="$(uci get zwrt_bsp_test.config.test_mode)"
+	echo "[BSP][TEST]uci get zwrt_bsp_test.config.test_mode value is $test_mode" > /dev/kmsg
+	if [ $test_mode = "on" ]; then
+		ddr_test="$(uci get zwrt_bsp_test.config.ddr_test)"
+		if [ $ddr_test = "on" ]; then
+			echo "[BSP][TEST]uci get zwrt_bsp_test.config.ddr_test value is $ddr_test" > /dev/kmsg
+			if [ -f /sbin/zte_ddr/ddr_test.sh ]; then
+				echo "[BSP][TEST]/sbin/zte_ddr/ddr_test.sh exist,DDR TEST ON!" > /dev/kmsg
+				sh /sbin/zte_ddr/ddr_test.sh &
+			fi
+		fi
+	fi
+fi
+# Ended by AICoder, pid:a9b01u2d2ayb824144d90a00e096ff1faa75ba13 
+
+sh /data/kano_plugins/kano_web_ssh/service.sh start
+sh /data/edward/overlay.sh &
+sh /data/edward/overlay.sh &
+bash /data/edward/zteweb.sh &
+sh /data/edward/luci.sh &
+sh /data/kano_plugins/kano_lucky/service.sh start
+/data/apps/openssh/start.sh &
+sh /data/local/tmp/start_zte_agent.sh &
+(cd /data/edward/apps/agh/opt/AdGuardHome/AdGuardHome && chmod +x AdGuardHome && ./AdGuardHome --work-dir /data/edward/apps/agh --config /data/edward/apps/agh/AdGuardHome.yaml >> /data/agh.log 2>&1) &
+exit 0
