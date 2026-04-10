@@ -143,7 +143,7 @@ opkg install rpcd luci-lib-base luci-lib-nixio --force-reinstall
 Optional but recommended:
 
 ```bash
-opkg install luci-app-firewall --force-reinstall
+opkg install luci-app-firewall luci-mod-system luci-mod-status --force-reinstall
 ```
 
 ------
